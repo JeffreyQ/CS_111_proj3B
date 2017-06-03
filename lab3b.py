@@ -28,9 +28,12 @@ class analyzer:
 		self.blocksPerGroup = 0
 		self.inodesPerGroup = 0
 		self.firstNonRsvpInode = 0
+		self.csvfile = csvfile
 
 	def initSuperblock(self):
-		
+		reader = csv.reader(self.csvfile, delimiter=",")
+		for row in reader:
+			print row
 
 
 
@@ -44,5 +47,6 @@ if __name__ == "__main__":
 		print >> sys.stderr, "Could not read file"
 		sys.exit(1)
 	
-	analyzer(f)
+	FSA = analyzer(f)
+	FSA.initSuperblock()
 	
