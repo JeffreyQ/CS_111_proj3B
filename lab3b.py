@@ -18,16 +18,31 @@ class Block:
 
 
 
+class analyzer:
+	def __init__(self, csvfile):
+		# SUPERBLOCK INFO
+		self.numBlocks = 0
+		self.numInodes = 0
+		self.blockSize = 0
+		self.inodeSize = 0
+		self.blocksPerGroup = 0
+		self.inodesPerGroup = 0
+		self.firstNonRsvpInode = 0
 
+	def initSuperblock(self):
+		
 
-def main(argv):
-	try:
-		f = open(argv, 'r')
-	except IOError:
-		print "Could not read file:", f
-		sys.exit(1)
-	
 
 
 if __name__ == "__main__":
-	main(sys.argv[1])	
+	if len(sys.argv) != 2:
+		print >> sys.stderr, "Usage:\tpython lab3b.py *.csv"
+		sys.exit(1)
+	try:
+		f = open(sys.argv[1], 'r')
+	except IOError:
+		print >> sys.stderr, "Could not read file"
+		sys.exit(1)
+	
+	analyzer(f)
+	
