@@ -27,14 +27,33 @@ class analyzer:
 		self.inodeSize = 0
 		self.blocksPerGroup = 0
 		self.inodesPerGroup = 0
-		self.firstNonRsvpInode = 0
+		self.firstNonRsrvdInode = 0
 		self.csvfile = csvfile
+
+		self.free_blocks = set()
 
 	def initSuperblock(self):
 		reader = csv.reader(self.csvfile, delimiter=",")
-		for row in reader:
-			print row
+		rows = list(reader)
+		self.numBlocks = rows[0][1]
+		self.numInodes = rows[0][2]
+		self.blockSize = rows[0][3]
+		self.inodeSize = rows[0][4]
+		self.blocksPerGroup = rows[0][5]
+		self.inodesPerGroup = rows[0][6]
+		self.firstNonRsrvdInode = rows[0][7]
+"""	
+		print self.numBlocks
+		print self.numInodes
+		print self.blockSize
+		print self.inodeSize
+		print self.blocksPerGroup
+		print self.inodesPerGroup
+		print self.firstNonRsrvdInode
+"""
 
+	# def initFreeList(self):
+		
 
 
 if __name__ == "__main__":
