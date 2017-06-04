@@ -43,11 +43,14 @@ class analyzer:
 		self.free_inodes = set()
 
 		self.unrefBlocks = set()
-		self.allocatedBlocks = set()
+		self.allocatedBlocks = set() # bad naming convention, intuitively refers to opposite of what the spec is trying to say
 		
+		self.reservedBlocks = set()
 
 
 	def initData(self):
+		for i in range(1, 8):
+			self.reservedBlocks.add(i)
 		for row in self.reader:
 			if row[0] == "SUPERBLOCK":
 				self.numBlocks = row[1]
@@ -58,9 +61,9 @@ class analyzer:
 				self.inodesPerGroup = row[6]
 				self.firstNonRsrvdInode = row[7]
 			elif row[0] == "BFREE":
-				self.free_blocks.add(row[1])	
+				self.free_blocks.add( int(row[1]) )	
 			elif row[0] == "IFREE":
-				self.free_inodes.add(row[1])		
+				self.free_inodes.add( int(row[1]) )		
 			elif row[0] == "GROUP":
 				self.groupNum = row[1]
 				self.numFreeBlocks = row[4]
@@ -72,15 +75,19 @@ class analyzer:
 				for item in row[12:]: # slicing
 					if item == 0:
 						break
-					self.allocatedBlocks.add(item)
+					self.allocatedBlocks.add( int(item))
 			elif row[0] == "INDIRECT":
-				self.allocatedBlocks.add(row[5])
+				self.allocatedBlocks.add( int(row[5]))
 
 	def printAllocatedBlocks(self):
 		for blockNum in self.allocatedBlocks:
 			if blockNum in self.free_blocks:
 				print "ALLOCATED BLOCK %s ON FREELIST" % (blockNum)
 
+	def printUnrefBlocks(self):
+		for i in range(0, int(self.numBlocks)):
+			if i not in self.free_blocks and i not in self.allocatedBlocks and i not in self.reservedBlocks:
+				print "UNREFERENCED BLOCK %s" % (i)
 
 	def printContents(self):
 		for item in self.allocatedBlocks:
@@ -100,5 +107,6 @@ if __name__ == "__main__":
 	FSA = analyzer(f)
 	FSA.initData()
 	FSA.printAllocatedBlocks()
+	FSA.printUnrefBlocks()
 #	FSA.printContents()
 	
