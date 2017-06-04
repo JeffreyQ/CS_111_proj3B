@@ -38,10 +38,14 @@ class analyzer:
 		self.ibmapNum = 0
 		self.firstInodeBlockNum = 0
 
-
 		self.reader = csv.reader(csvfile, delimiter=",")
 		self.free_blocks = set()
 		self.free_inodes = set()
+
+		self.unrefBlocks = set()
+		self.allocatedBlocks = set()
+		
+
 
 	def initData(self):
 		for row in self.reader:
@@ -53,22 +57,29 @@ class analyzer:
 				self.blocksPerGroup = row[5]
 				self.inodesPerGroup = row[6]
 				self.firstNonRsrvdInode = row[7]
-			if row[0] == "BFREE":
+			elif row[0] == "BFREE":
 				self.free_blocks.add(row[1])	
-			if row[0] == "IFREE":
+			elif row[0] == "IFREE":
 				self.free_inodes.add(row[1])		
-			if row[0] == "GROUP":
+			elif row[0] == "GROUP":
 				self.groupNum = row[1]
 				self.numFreeBlocks = row[4]
 				self.numFreeInodes = row[5]
 				self.bbmapNum = row[6]
 				self.ibmapNum = row[7]
 				self.firstInodeBlockNum = row[8]
+			elif row[0] == "INODE":
+				for item in row[12:]: # slicing
+					if item == 0:
+						break
+					self.allocatedBlocks.add(item)
+#			elif row[0] == "INDIRECT":
+				
 
 
 
 	def printContents(self):
-		for item in self.free_blocks:
+		for item in self.allocatedBlocks:
 			print item
 
 
