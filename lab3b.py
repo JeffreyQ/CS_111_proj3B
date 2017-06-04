@@ -20,7 +20,7 @@ class Block:
 
 class analyzer:
 	def __init__(self, csvfile):
-		# SUPERBLOCK INFO
+		# SUPERBLOCK SUMMARY
 		self.numBlocks = 0
 		self.numInodes = 0
 		self.blockSize = 0
@@ -29,6 +29,15 @@ class analyzer:
 		self.inodesPerGroup = 0
 		self.firstNonRsrvdInode = 0
 		self.csvfile = csvfile
+
+		# GROUP SUMMARY
+		self.groupNum = 0
+		self.numFreeBlocks = 0
+		self.numFreeInodes = 0
+		self.bbmapNum = 0
+		self.ibmapNum = 0
+		self.firstInodeBlockNum = 0
+
 
 		self.reader = csv.reader(csvfile, delimiter=",")
 		self.free_blocks = set()
@@ -48,7 +57,13 @@ class analyzer:
 				self.free_blocks.add(row[1])	
 			if row[0] == "IFREE":
 				self.free_inodes.add(row[1])		
-
+			if row[0] == "GROUP":
+				self.groupNum = row[1]
+				self.numFreeBlocks = row[4]
+				self.numFreeInodes = row[5]
+				self.bbmapNum = row[6]
+				self.ibmapNum = row[7]
+				self.firstInodeBlockNum = row[8]
 
 
 
