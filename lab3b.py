@@ -73,9 +73,13 @@ class analyzer:
 					if item == 0:
 						break
 					self.allocatedBlocks.add(item)
-#			elif row[0] == "INDIRECT":
-				
+			elif row[0] == "INDIRECT":
+				self.allocatedBlocks.add(row[5])
 
+	def printAllocatedBlocks(self):
+		for blockNum in self.allocatedBlocks:
+			if blockNum in self.free_blocks:
+				print "ALLOCATED BLOCK %s ON FREELIST" % (blockNum)
 
 
 	def printContents(self):
@@ -95,5 +99,6 @@ if __name__ == "__main__":
 	
 	FSA = analyzer(f)
 	FSA.initData()
-	FSA.printContents()
+	FSA.printAllocatedBlocks()
+#	FSA.printContents()
 	
