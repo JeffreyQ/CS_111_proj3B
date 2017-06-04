@@ -167,7 +167,7 @@ class analyzer:
 		for i in range(1, 8):
 			self.reservedBlocks.add(i)
 		# populate reservedInodes set with inodes reserved by the system
-		for i in range(1, self.firstNonRsrvdInode):
+		for i in range(1, int(self.firstNonRsrvdInode)):
 			self.reservedInodes.add(i)
 	def printAllocatedBlocks(self):
 		for blockNum in self.allocatedBlocks:
