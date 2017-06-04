@@ -77,7 +77,7 @@ class analyzer:
 						break
 					self.allocatedBlocks.add( int(item))
 			elif row[0] == "INDIRECT":
-				self.allocatedBlocks.add( int(row[5]))
+				self.allocatedBlocks.add( int(row[5]) )
 
 	def printAllocatedBlocks(self):
 		for blockNum in self.allocatedBlocks:
