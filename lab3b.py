@@ -163,9 +163,9 @@ class analyzer:
 				print "UNREFERENCED BLOCK %s" % (i)
 
 	def printAllocatedInodes(self):
-		for inodeNum in self.allocatedInodes:
-			if inodeNum in self.free_inodes:
-				print "hellohere %s" % (inodeNum)
+		for i in range(1, int(self.numInodes)):
+			if i not in self.allocatedInodes and i not in self.free_inodes and i not in self.reservedInodes:
+				print "UNALLOCATED INODE %d NOT ON FREELIST" % (i)
 
 
 	def printContents(self):
@@ -187,5 +187,6 @@ if __name__ == "__main__":
 	FSA.initData()
 	FSA.printAllocatedBlocks()
 	FSA.printUnrefBlocks()
+	FSA.printAllocatedInodes()
 #	FSA.printContents()
 	
