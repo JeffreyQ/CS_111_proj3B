@@ -152,20 +152,35 @@ class analyzer:
 		# populate reservedInodes set with inodes reserved by the system
 		for i in range(0, int(self.firstNonRsrvdInode)):
 			self.reservedInodes.add(i)
+
+
+
 	def printAllocatedBlocks(self):
 		for blockNum in self.allocatedBlocks:
 			if blockNum in self.free_blocks:
 				print "ALLOCATED BLOCK %s ON FREELIST" % (blockNum)
+
+
+
 
 	def printUnrefBlocks(self):
 		for i in range(0, int(self.numBlocks)):
 			if i not in self.free_blocks and i not in self.allocatedBlocks and i not in self.reservedBlocks:
 				print "UNREFERENCED BLOCK %s" % (i)
 
+
+
+
 	def printAllocatedInodes(self):
 		for i in range(0, int(self.numInodes)):
 			if i not in self.allocatedInodes and i not in self.free_inodes and i not in self.reservedInodes:
 				print "UNALLOCATED INODE %d NOT ON FREELIST" % (i)
+
+	def printAllInodeInconsistency(self):
+		for inode in self.free_inodes:
+			if inode in self.reservedInodes:
+				print "ALLOCATED INODE %d ON FREELIST" % (inode)
+
 
 
 	def printContents(self):
@@ -188,5 +203,6 @@ if __name__ == "__main__":
 	FSA.printAllocatedBlocks()
 	FSA.printUnrefBlocks()
 	FSA.printAllocatedInodes()
+	FSA.printAllInodeInconsistency()
 #	FSA.printContents()
 	
