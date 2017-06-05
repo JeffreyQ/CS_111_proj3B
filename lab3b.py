@@ -150,7 +150,7 @@ class analyzer:
 		for i in range(1, 8):
 			self.reservedBlocks.add(i)
 		# populate reservedInodes set with inodes reserved by the system
-		for i in range(1, int(self.firstNonRsrvdInode)):
+		for i in range(0, int(self.firstNonRsrvdInode)):
 			self.reservedInodes.add(i)
 	def printAllocatedBlocks(self):
 		for blockNum in self.allocatedBlocks:
@@ -163,7 +163,7 @@ class analyzer:
 				print "UNREFERENCED BLOCK %s" % (i)
 
 	def printAllocatedInodes(self):
-		for i in range(1, int(self.numInodes)):
+		for i in range(0, int(self.numInodes)):
 			if i not in self.allocatedInodes and i not in self.free_inodes and i not in self.reservedInodes:
 				print "UNALLOCATED INODE %d NOT ON FREELIST" % (i)
 

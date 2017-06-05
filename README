@@ -1,5 +1,8 @@
 Name: Jeffrey Qiu, Udayan Sahai
 
 
+
+usage: python lab3b.py *.csv
+
 References:
 	http://effbot.org/zone/python-with-statement.htm
