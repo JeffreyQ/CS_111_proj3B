@@ -6,3 +6,4 @@ usage: python lab3b.py *.csv
 
 References:
 	http://effbot.org/zone/python-with-statement.htm
+wget http://www.cs.pomona.edu/classes/cs134/projects/P3B-test_3.err
