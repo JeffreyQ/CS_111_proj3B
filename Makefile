@@ -1,20 +1,23 @@
 CC = python3
 ID = 804808179
 TARBALL = lab3b-$(ID).tar.gz
-sources = Makefile lab3b.py README* 
+sources = Makefile lab3b.py README 
 
 
 default: lab3b
 	@echo "python compiled without errors"
 
+run: lab3b
+
+lab3b:
+	$(CC) lab3b.py $4
+
 clean: 
 	rm -rf lab3b lab3b-804808179.tar.gz
 
-run: default
-	./lab3a $1
+test: 
+	./test.sh
 
-run_test: default 
-	./lab3a trivial.img
 
 dist: default 
-	tar -zvcf lab3b-804808179.tar.gz Makefile README lab3b lab3b.py
+	tar -zvcf lab3b-$(ID).tar.gz lab3b.py $(sources)

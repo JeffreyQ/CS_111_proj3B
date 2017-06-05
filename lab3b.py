@@ -140,14 +140,16 @@ class analyzer:
 				self.allocatedInodes.add( int(row[1]) )
 				# populate allocated blocks with inode direct pointers
 				for item in row[12:]: # slicing
-					if item == 0:
-						break
-					self.allocatedBlocks.add( int(item) )
+					if int(item) != 0:
+						if int(item) >= int(self.numBlocks) or int(item) < 0:
+							print "INVALID BLOCK %d IN INODE %d AT OFFSET 0" % (int(item), int(row[1]))
+						else:
+							self.allocatedBlocks.add( int(item) )
 			# populate allocated blocks set with referenced blockNum of INDIR block
 			if row[0] == "INDIRECT":
 				self.allocatedBlocks.add( int(row[5]) )
 		# populate reservedBlocks set with blocks reserved by the system
-		for i in range(1, 8):
+		for i in range(0, 8):
 			self.reservedBlocks.add(i)
 		# populate reservedInodes set with inodes reserved by the system
 		for i in range(0, int(self.firstNonRsrvdInode)):
@@ -168,7 +170,9 @@ class analyzer:
 			if i not in self.free_blocks and i not in self.allocatedBlocks and i not in self.reservedBlocks:
 				print "UNREFERENCED BLOCK %s" % (i)
 
-
+	# def printInvalBlocks(self):
+	#	for blockNum in self.allocatedBlocks:
+	#		if blockNum >= self
 
 
 	def printAllocatedInodes(self):
