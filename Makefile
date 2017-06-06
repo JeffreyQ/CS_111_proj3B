@@ -1,4 +1,4 @@
-CC = python3
+CC = python
 ID = 804808179
 TARBALL = lab3b-$(ID).tar.gz
 sources = Makefile lab3b.py README 

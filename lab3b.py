@@ -77,7 +77,7 @@ import csv
  * 10. time of last access (mm/dd/yy hh:mm:ss, GMT)
  * 11. file size (decimal)
  * 12. number of blocks (decimal)
- * 13. The next fifteen fields are block addresses (decimal, 12 direct, one indirect, one double indirect, one tripple indirect).
+ * 13. The next fifteen fields are block appendresses (decimal, 12 direct, one indirect, one double indirect, one tripple indirect).
 """
 
 
@@ -103,15 +103,15 @@ class analyzer:
 		self.firstInodeBlockNum = 0
 
 		self.reader = csv.reader(csvfile, delimiter=",")
-		self.free_blocks = set()
-		self.free_inodes = set()
+		self.free_blocks = list()
+		self.free_inodes = list()
 
-		self.unrefBlocks = set()
-		self.allocatedBlocks = set() # bad naming convention, intuitively refers to opposite of what the spec is trying to say
+		self.unrefBlocks = list()
+		self.allocatedBlocks = list() # bad naming convention, intuitively refers to opposite of what the spec is trying to say
 		
-		self.reservedBlocks = set()
-		self.reservedInodes = set()
-		self.allocatedInodes = set()
+		self.reservedBlocks = list()
+		self.reservedInodes = list()
+		self.allocatedInodes = list()
 
 	def initData(self):
 		# refer to the summaries above
@@ -125,9 +125,9 @@ class analyzer:
 				self.inodesPerGroup = row[6]
 				self.firstNonRsrvdInode = row[7]
 			if row[0] == "BFREE":
-				self.free_blocks.add( int(row[1]) )	
+				self.free_blocks.append( int(row[1]) )	
 			if row[0] == "IFREE":
-				self.free_inodes.add( int(row[1]) )		
+				self.free_inodes.append( int(row[1]) )		
 			if row[0] == "GROUP":
 				self.groupNum = row[1]
 				self.numFreeBlocks = row[4]
@@ -137,40 +137,40 @@ class analyzer:
 				self.firstInodeBlockNum = row[8]
 			if row[0] == "INODE":
 				# populate allocated inodes with inode
-				self.allocatedInodes.add( int(row[1]) )
+				self.allocatedInodes.append( int(row[1]) )
 				# populate allocated blocks with inode direct pointers
 				for item in row[12:24]: # slicing
 					if int(item) != 0:
 						if int(item) >= int(self.numBlocks) or int(item) < 0:
 							print "INVALID BLOCK %d IN INODE %d AT OFFSET 0" % (int(item), int(row[1]))
 						else:
-							self.allocatedBlocks.add( int(item) )
+							self.allocatedBlocks.append( int(item) )
 				if int(row[24]) != 0:
 					if int(row[24]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID INDIRECT BLOCK %d IN INODE %d AT OFFSET 12" % (int(row[24]), int(row[1]))
 					else:
-						self.allocatedBlocks.add( int(row[24]) )
+						self.allocatedBlocks.append( int(row[24]) )
 				if int(row[25]) != 0:
 					if int(row[25]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 268" % (int(row[25]), int(row[1]))
 					else:
-						self.allocatedBlocks.add( int(row[25]) )
+						self.allocatedBlocks.append( int(row[25]) )
 				if int(row[26]) != 0:
 					if int(row[26]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID TRIPPLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 65804" % (int(row[26]), int(row[1]))
 					else:
-						self.allocatedBlocks.add( int(row[26]) )
+						self.allocatedBlocks.append( int(row[26]) )
 						
 				
-			# populate allocated blocks set with referenced blockNum of INDIR block
+			# populate allocated blocks list with referenced blockNum of INDIR block
 			if row[0] == "INDIRECT":
-				self.allocatedBlocks.add( int(row[5]) )
-		# populate reservedBlocks set with blocks reserved by the system
+				self.allocatedBlocks.append( int(row[5]) )
+		# populate reservedBlocks list with blocks reserved by the system
 		for i in range(0, 8):
-			self.reservedBlocks.add(i)
-		# populate reservedInodes set with inodes reserved by the system
+			self.reservedBlocks.append(i)
+		# populate reservedInodes list with inodes reserved by the system
 		for i in range(0, int(self.firstNonRsrvdInode)):
-			self.reservedInodes.add(i)
+			self.reservedInodes.append(i)
 
 	def printReservedBlocks(self):
 		print self.reader
