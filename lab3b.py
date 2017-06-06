@@ -139,23 +139,36 @@ class analyzer:
 				# populate allocated inodes with inode
 				self.allocatedInodes.append( int(row[1]) )
 				# populate allocated blocks with inode direct pointers
+				counter = 0 
 				for item in row[12:24]: # slicing
 					if int(item) != 0:
+						
+						if int(item) <= 7 and int(item) > 0:
+							print "RESERVED BLOCK %d IN INODE %d AT OFFSET %d" % (int(item),int(row[1]), int(counter))
+						
+						counter = int(counter) +1
+
 						if int(item) >= int(self.numBlocks) or int(item) < 0:
 							print "INVALID BLOCK %d IN INODE %d AT OFFSET 0" % (int(item), int(row[1]))
 						else:
 							self.allocatedBlocks.append( int(item) )
 				if int(row[24]) != 0:
+					if int(row[24]) <= 7 and int(row[24]) > 0: 
+						print "RESERVED INDIRECT BLOCK %d IN INODE %d AT OFFSET 12" % (int(row[24]), int(row[1]))
 					if int(row[24]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID INDIRECT BLOCK %d IN INODE %d AT OFFSET 12" % (int(row[24]), int(row[1]))
 					else:
 						self.allocatedBlocks.append( int(row[24]) )
 				if int(row[25]) != 0:
+					if int(row[25]) <= 7 and int(row[25]) > 0: 
+						print "RESERVED DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 268" % (int(row[25]), int(row[1]))
 					if int(row[25]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 268" % (int(row[25]), int(row[1]))
 					else:
 						self.allocatedBlocks.append( int(row[25]) )
 				if int(row[26]) != 0:
+					if int(row[26]) <= 7 and int(row[26]) > 0: 
+						print "RESERVED TRIPPLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 65804" % (int(row[26]), int(row[1]))
 					if int(row[26]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID TRIPPLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 65804" % (int(row[26]), int(row[1]))
 					else:
@@ -164,7 +177,9 @@ class analyzer:
 				
 			# populate allocated blocks list with referenced blockNum of INDIR block
 			if row[0] == "INDIRECT":
-				self.allocatedBlocks.append( int(row[5]) )
+				self.allocatedBlocks.append( int(row[5]))
+
+
 		# populate reservedBlocks list with blocks reserved by the system
 		for i in range(0, 8):
 			self.reservedBlocks.append(i)
