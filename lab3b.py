@@ -172,12 +172,21 @@ class analyzer:
 		for i in range(0, int(self.firstNonRsrvdInode)):
 			self.reservedInodes.add(i)
 
+	def printReservedBlocks(self):
+		print self.reader
+		for row in self.reader:
+			print row
+			if row[0] == "INODE":
+				for item in row[12:24]:
+					if item in self.reservedBlocks:
+						print "RESERVED BLOCK %d IN INODE %d AT OFFSET 0" % (int(item), int(row[1]))
+
 
 
 	def printAllocatedBlocks(self):
-		for blockNum in self.allocatedBlocks:
-			if blockNum in self.free_blocks:
-				print "ALLOCATED BLOCK %s ON FREELIST" % (blockNum)
+		for block in self.allocatedBlocks:
+			if block in self.free_blocks:
+				print "ALLOCATED BLOCK %s ON FREELIST" % (block)
 
 
 
@@ -202,8 +211,6 @@ class analyzer:
 			if inode in self.reservedInodes:
 				print "ALLOCATED INODE %d ON FREELIST" % (inode)
 
-
-
 	def printContents(self):
 		for item in self.allocatedBlocks:
 			print item
@@ -225,5 +232,6 @@ if __name__ == "__main__":
 	FSA.printUnrefBlocks()
 	FSA.printAllocatedInodes()
 	FSA.printAllInodeInconsistency()
+#	FSA.printReservedBlocks()
 #	FSA.printContents()
 	
