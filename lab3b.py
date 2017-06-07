@@ -287,7 +287,9 @@ class analyzer:
 			for inode in self.inodeList:
 				if int(dirent.fileInode) == int(inode.inodeNumber):
 					isAllocated = 1
-			if int(isAllocated) == 0:
+			if int(dirent.fileInode) > int(self.numInodes):
+				print "DIRECTORY INODE %d NAME %s INVALID INODE %d" % ( int(dirent.parentInode), dirent.name, int(dirent.fileInode) )
+			elif int(isAllocated) == 0:
 				print "DIRECTORY INODE %d NAME %s UNALLOCATED INODE %d" % ( int(dirent.parentInode), dirent.name, int(dirent.fileInode) )
 
 	def printAllocatedBlocks(self):
