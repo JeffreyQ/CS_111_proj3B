@@ -58,6 +58,12 @@ import csv
  *
 """
 
+class inodeSummary: 
+	def __init__(self):
+		self.inodeNumber = 0
+		self.linkCount = 0
+		self.blockPointers = list()
+
 """
  * I-node summary
  *
@@ -79,6 +85,14 @@ import csv
  * 12. number of blocks (decimal)
  * 13. The next fifteen fields are block appendresses (decimal, 12 direct, one indirect, one double indirect, one tripple indirect).
 """
+
+class indirect:
+	def __init__(self):
+		self.inodeNumber = 0
+		self.indirLevel = 0
+		self.blockOffset = 0
+		self.blockNumber = 0
+
 
 
 
@@ -112,6 +126,12 @@ class analyzer:
 		self.reservedBlocks = list()
 		self.reservedInodes = list()
 		self.allocatedInodes = list()
+		self.inodeList = list()
+		self.indirectList = list()
+		self.allInodes = list()
+		self.allBlocks = list()
+		
+
 
 	def initData(self):
 		# refer to the summaries above
@@ -136,13 +156,20 @@ class analyzer:
 				self.ibmapNum = row[7]
 				self.firstInodeBlockNum = row[8]
 			if row[0] == "INODE":
+				inode = inodeSummary()
+				inode.inodeNumber = int (row[1])
+				inode.linkCount = int (row[6])
+				self.allInodes.append(int (row[1]))
+
 				# populate allocated inodes with inode
 				self.allocatedInodes.append( int(row[1]) )
 				# populate allocated blocks with inode direct pointers
 				counter = 0 
 				for item in row[12:24]: # slicing
+
+					inode.blockPointers.append(int (item))
 					if int(item) != 0:
-						
+						self.allBlocks.append(int(item))
 						if int(item) <= 7 and int(item) > 0:
 							print "RESERVED BLOCK %d IN INODE %d AT OFFSET %d" % (int(item),int(row[1]), int(counter))
 						
@@ -151,22 +178,33 @@ class analyzer:
 						if int(item) >= int(self.numBlocks) or int(item) < 0:
 							print "INVALID BLOCK %d IN INODE %d AT OFFSET 0" % (int(item), int(row[1]))
 						else:
-							self.allocatedBlocks.append( int(item) )
+							self.allocatedBlocks.append( int(item))
+
+				inode.blockPointers.append(int (row[24]))
+				inode.blockPointers.append( int (row[25]))
+				inode.blockPointers.append(int(row[26]))
+				self.inodeList.append(inode)
+
 				if int(row[24]) != 0:
+					self.allBlocks.append( int(row[24]))
 					if int(row[24]) <= 7 and int(row[24]) > 0: 
 						print "RESERVED INDIRECT BLOCK %d IN INODE %d AT OFFSET 12" % (int(row[24]), int(row[1]))
 					if int(row[24]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID INDIRECT BLOCK %d IN INODE %d AT OFFSET 12" % (int(row[24]), int(row[1]))
 					else:
 						self.allocatedBlocks.append( int(row[24]) )
+
 				if int(row[25]) != 0:
+					self.allBlocks.append( int(row[25]))
 					if int(row[25]) <= 7 and int(row[25]) > 0: 
 						print "RESERVED DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 268" % (int(row[25]), int(row[1]))
 					if int(row[25]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 268" % (int(row[25]), int(row[1]))
 					else:
 						self.allocatedBlocks.append( int(row[25]) )
+
 				if int(row[26]) != 0:
+					self.allBlocks.append( int(row[26]))
 					if int(row[26]) <= 7 and int(row[26]) > 0: 
 						print "RESERVED TRIPPLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 65804" % (int(row[26]), int(row[1]))
 					if int(row[26]) >= int(self.numBlocks) or int(item) < 0:
@@ -177,7 +215,16 @@ class analyzer:
 				
 			# populate allocated blocks list with referenced blockNum of INDIR block
 			if row[0] == "INDIRECT":
+				self.allInodes.append(int (row[1]))
+				self.allBlocks.append( int (row[5]))
+				indir = indirect()
+				indir.inodeNumber =  int (row[1]) 
+				indir.indirLevel = int (row[2])
+				indir.blockOffset = int (row[3])
+				indir.blockNumber = int (row[5])
+				self.indirectList.append(indir)
 				self.allocatedBlocks.append( int(row[5]))
+
 
 
 		# populate reservedBlocks list with blocks reserved by the system
@@ -205,7 +252,6 @@ class analyzer:
 
 
 
-
 	def printUnrefBlocks(self):
 		for i in range(0, int(self.numBlocks)):
 			if i not in self.free_blocks and i not in self.allocatedBlocks and i not in self.reservedBlocks:
@@ -229,6 +275,19 @@ class analyzer:
 	def printContents(self):
 		for item in self.allocatedBlocks:
 			print item
+	def testPrinter(self):
+		# print self.inodeList[3].inodeNumber 
+		# print "%d" % (len(self.indirectList))
+
+		for item in self.allBlocks:
+			print item
+
+	def printDuplicate(self):
+			for item in self.inodeList[0:12]: 
+				for nBlock in item.blockPointers: 
+					if self.allBlocks.count(nBlock) > 1:
+						print "BLOCK - %d , INODE - %d" %  (int(nBlock), int(item.inodeNumber))
+						
 
 
 if __name__ == "__main__":
@@ -247,6 +306,9 @@ if __name__ == "__main__":
 	FSA.printUnrefBlocks()
 	FSA.printAllocatedInodes()
 	FSA.printAllInodeInconsistency()
+	#FSA.testPrinter()
+	FSA.printDuplicate()
+
 #	FSA.printReservedBlocks()
 #	FSA.printContents()
 	
