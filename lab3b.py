@@ -329,6 +329,43 @@ class analyzer:
 		 for item in self.inodeList:
 			print item
 
+	def doubleDot(self):
+		for item in self.direntList:
+			childNode = 0
+			FatherNode = 0   # From perspective of .. 
+			if item.name == "'..'":
+				#print "Name - %s, MyInode - %d ,Refer Inode - %d " % (item.name, int(item.parentInode) ,int(item.fileInode))
+				childNode = item.parentInode
+				FatherNode = item.fileInode
+			else:
+				continue
+
+			for node in self.direntList: 
+				if node.fileInode == childNode and node.parentInode != childNode: 
+					# print "Name - %s, MyInode - %d ,Refer Inode - %d " % (node.name, int(node.parentInode) ,int(node.fileInode))
+					if FatherNode != node.parentInode: 
+					 	print "HIT"
+
+
+
+
+
+
+
+
+				
+
+
+	def singleDot(self): 
+		for item in self.direntList:
+			if item.name == "'.'":
+				if(item.parentInode != item.fileInode):
+					print "DIRECTORY INODE %d NAME '.' LINK TO INODE %d SHOULD BE %d" % (int (item.parentInode), int (item.fileInode),int (item.parentInode))
+				
+
+		#	SEXIEST FUNCTION IN THE HOUSE 
+		#EVERYBODY GIVE IT UP FOR UDAYAN!!!!!!!!
+
 	def printDuplicate(self):
 			for item in self.inodeList: 
 				count = 0
@@ -373,6 +410,8 @@ if __name__ == "__main__":
 	FSA.printDuplicate()
 	FSA.badRefCounts()
 	FSA.unallocInodes()
+	FSA.singleDot()
+	FSA.doubleDot()
 
 #	FSA.printReservedBlocks()
 #	FSA.printContents()
