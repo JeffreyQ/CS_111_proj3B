@@ -272,7 +272,6 @@ class analyzer:
 			for dirent in self.direntList:
 				# print "dirent fileInode #:%d\tdirent parentInode #:%d" % ( int(dirent.fileInode), int(dirent.parentInode))
 				if int(dirent.fileInode) == int(inode.inodeNumber):
-					# print "hello i made it to the inode #%d" % ( int(dirent.fileInode))
 					inodeExists = 1
 					direntReferences += 1
 
@@ -283,15 +282,13 @@ class analyzer:
 				print "INODE %d HAS %d LINKS BUT LINKCOUNT IS %d" % ( int(inode.inodeNumber), int(direntReferences), int(inode.linkCount))
 
 	def unallocInodes(self):
-		for inode in self.inodeList:
-			inodeExists = 0
-			direntReferences = 0
-			for dirent in self.direntList:
+		for dirent in self.direntList:
+			isAllocated = 0
+			for inode in self.inodeList:
 				if int(dirent.fileInode) == int(inode.inodeNumber):
-					inodeExists = 1
-					direntReferences += 1
-			if int(inodeExists) == 0:
-				print "hello"
+					isAllocated = 1
+			if int(isAllocated) == 0:
+				print "DIRECTORY INODE %d NAME %s UNALLOCATED INODE %d" % ( int(dirent.parentInode), dirent.name, int(dirent.fileInode) )
 
 	def printAllocatedBlocks(self):
 		for block in self.allocatedBlocks:
@@ -373,6 +370,7 @@ if __name__ == "__main__":
 	#FSA.testPrinter()
 	FSA.printDuplicate()
 	FSA.badRefCounts()
+	FSA.unallocInodes()
 
 #	FSA.printReservedBlocks()
 #	FSA.printContents()
