@@ -283,11 +283,27 @@ class analyzer:
 			print item
 
 	def printDuplicate(self):
-			for item in self.inodeList[0:12]: 
-				for nBlock in item.blockPointers: 
+			for item in self.inodeList: 
+				count = 0
+				for nBlock in item.blockPointers[0:12]: 
 					if self.allBlocks.count(nBlock) > 1:
-						print "BLOCK - %d , INODE - %d" %  (int(nBlock), int(item.inodeNumber))
+						print "DUPLICATE BLOCK %d IN INODE %d AT OFFSET %d" %  ( int(nBlock), int(item.inodeNumber), int(count))
+						count = count + 1
+
+			for item in self.inodeList: 
+				nBlock = item.blockPointers[12]
+				if self.allBlocks.count(nBlock) > 1:
+					print "DUPLICATE INDIRECT BLOCK %d IN INODE %d AT OFFSET 12" %  (int(nBlock), int(item.inodeNumber))
 						
+			for item in self.inodeList: 
+				nBlock = item.blockPointers[13]
+				if self.allBlocks.count(nBlock) > 1:
+					print "DUPLICATE DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 268" %  (int(nBlock), int(item.inodeNumber))
+
+			for item in self.inodeList: 
+				nBlock = item.blockPointers[14]
+				if self.allBlocks.count(nBlock) > 1:
+					print "DUPLICATE TRIPPLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 65804" %  (int(nBlock), int(item.inodeNumber))
 
 
 if __name__ == "__main__":
