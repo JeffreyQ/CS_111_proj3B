@@ -277,11 +277,21 @@ class analyzer:
 					direntReferences += 1
 
 			# print "hello inodeExists = %d\tand direntReferences = %d" % ( int(inodeExists), int(direntReferences))
-			if int(inodeExists) == 0:
-				print "INODE %d HAS %d LINKS BUT LINKCOUNT IS %d" % (int(inode.inodeNumber), int(direntReferences), int(inode.linkCount))
-			if int(inode.linkCount) != int(direntReferences):
+			# if int(inodeExists) == 0:
+			#	print "INODE %d HAS %d LINKS BUT LINKCOUNT IS %d" % (int(inode.inodeNumber), int(direntReferences), int(inode.linkCount))
+			if (int(inodeExists) == 0) or (int(inode.linkCount) != int(direntReferences)):
 				print "INODE %d HAS %d LINKS BUT LINKCOUNT IS %d" % ( int(inode.inodeNumber), int(direntReferences), int(inode.linkCount))
 
+	def unallocInodes(self):
+		for inode in self.inodeList:
+			inodeExists = 0
+			direntReferences = 0
+			for dirent in self.direntList:
+				if int(dirent.fileInode) == int(inode.inodeNumber):
+					inodeExists = 1
+					direntReferences += 1
+			if int(inodeExists) == 0:
+				print "hello"
 
 	def printAllocatedBlocks(self):
 		for block in self.allocatedBlocks:
