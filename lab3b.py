@@ -64,6 +64,19 @@ class inodeSummary:
 		self.linkCount = 0
 		self.blockPointers = list()
 
+
+
+
+class direntSummary:
+	def __init__(self):
+		self.parentInode = 0
+		self.offset = 0
+		self.fileInode = 0
+		self.entryLen = 0
+		self.nameLen = 0
+		self.name = ""
+
+
 """
  * I-node summary
  *
@@ -92,8 +105,6 @@ class indirect:
 		self.indirLevel = 0
 		self.blockOffset = 0
 		self.blockNumber = 0
-
-
 
 
 class analyzer:
@@ -130,6 +141,7 @@ class analyzer:
 		self.indirectList = list()
 		self.allInodes = list()
 		self.allBlocks = list()
+		self.direntList = list()
 		
 
 
@@ -155,6 +167,15 @@ class analyzer:
 				self.bbmapNum = row[6]
 				self.ibmapNum = row[7]
 				self.firstInodeBlockNum = row[8]
+			if row[0] == "DIRENT":
+				dirent = direntSummary()
+				dirent.parentInode = row[1]
+				dirent.offset = row[2]
+				dirent.fileInode = row[3]
+				dirent.entryLen = row[4]
+				dirent.nameLen = row[5]
+				dirent.name = row[6]
+				self.direntList.append(dirent)
 			if row[0] == "INODE":
 				inode = inodeSummary()
 				inode.inodeNumber = int (row[1])
@@ -243,6 +264,23 @@ class analyzer:
 					if item in self.reservedBlocks:
 						print "RESERVED BLOCK %d IN INODE %d AT OFFSET 0" % (int(item), int(row[1]))
 
+	def badRefCounts(self):
+		for inode in self.inodeList:
+			inodeExists = 0
+			# print "inode number:%d\tlink count:%d" % ( int(inode.inodeNumber), int(inode.linkCount))
+			direntReferences = 0
+			for dirent in self.direntList:
+				# print "dirent fileInode #:%d\tdirent parentInode #:%d" % ( int(dirent.fileInode), int(dirent.parentInode))
+				if int(dirent.fileInode) == int(inode.inodeNumber):
+					# print "hello i made it to the inode #%d" % ( int(dirent.fileInode))
+					inodeExists = 1
+					direntReferences += 1
+
+			# print "hello inodeExists = %d\tand direntReferences = %d" % ( int(inodeExists), int(direntReferences))
+			if int(inodeExists) == 0:
+				print "INODE %d HAS %d LINKS BUT LINKCOUNT IS %d" % (int(inode.inodeNumber), int(direntReferences), int(inode.linkCount))
+			if int(inode.linkCount) != int(direntReferences):
+				print "INODE %d HAS %d LINKS BUT LINKCOUNT IS %d" % ( int(inode.inodeNumber), int(direntReferences), int(inode.linkCount))
 
 
 	def printAllocatedBlocks(self):
@@ -279,7 +317,7 @@ class analyzer:
 		# print self.inodeList[3].inodeNumber 
 		# print "%d" % (len(self.indirectList))
 
-		for item in self.allBlocks:
+		 for item in self.inodeList:
 			print item
 
 	def printDuplicate(self):
@@ -324,6 +362,7 @@ if __name__ == "__main__":
 	FSA.printAllInodeInconsistency()
 	#FSA.testPrinter()
 	FSA.printDuplicate()
+	FSA.badRefCounts()
 
 #	FSA.printReservedBlocks()
 #	FSA.printContents()
