@@ -150,6 +150,8 @@ class analyzer:
 		self.allBlocks = list()
 		self.direntList = list()
 		self.directoryList = list()
+		self.dic = {} 
+		self.dic[2] = 2 
 		
 
 
@@ -177,13 +179,16 @@ class analyzer:
 				self.firstInodeBlockNum = row[8]
 			if row[0] == "DIRENT":
 				dirent = direntSummary()
-				dirent.parentInode = row[1]
-				dirent.offset = row[2]
-				dirent.fileInode = row[3]
-				dirent.entryLen = row[4]
-				dirent.nameLen = row[5]
+				dirent.parentInode = int (row[1])
+				dirent.offset = int (row[2])
+				dirent.fileInode = int (row[3])
+				dirent.entryLen = int (row[4])
+				dirent.nameLen = int (row[5])
 				dirent.name = str(row[6])
 				self.direntList.append(dirent)
+				if dirent.name != "'.'" and dirent.name != "'..'":
+					self.dic[dirent.fileInode] = dirent.parentInode
+
 			if row[0] == "INODE":
 				inode = inodeSummary()
 				inode.inodeNumber = int (row[1])
@@ -216,28 +221,28 @@ class analyzer:
 
 				if int(row[24]) != 0:
 					self.allBlocks.append( int(row[24]))
-					if int(row[24]) <= 7 and int(row[24]) > 0: 
-						print "RESERVED INDIRECT BLOCK %d IN INODE %d AT OFFSET 12" % (int(row[24]), int(row[1]))
 					if int(row[24]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID INDIRECT BLOCK %d IN INODE %d AT OFFSET 12" % (int(row[24]), int(row[1]))
+					elif int(row[24]) <= 7 and int(row[24]) > 0: 
+						print "RESERVED INDIRECT BLOCK %d IN INODE %d AT OFFSET 12" % (int(row[24]), int(row[1]))
 					else:
 						self.allocatedBlocks.append( int(row[24]) )
 
 				if int(row[25]) != 0:
 					self.allBlocks.append( int(row[25]))
-					if int(row[25]) <= 7 and int(row[25]) > 0: 
-						print "RESERVED DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 268" % (int(row[25]), int(row[1]))
 					if int(row[25]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 268" % (int(row[25]), int(row[1]))
+					elif int(row[25]) <= 7 and int(row[25]) > 0: 
+						print "RESERVED DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 268" % (int(row[25]), int(row[1]))
 					else:
 						self.allocatedBlocks.append( int(row[25]) )
 
 				if int(row[26]) != 0:
 					self.allBlocks.append( int(row[26]))
-					if int(row[26]) <= 7 and int(row[26]) > 0: 
-						print "RESERVED TRIPPLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 65804" % (int(row[26]), int(row[1]))
 					if int(row[26]) >= int(self.numBlocks) or int(item) < 0:
 						print "INVALID TRIPPLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 65804" % (int(row[26]), int(row[1]))
+					elif int(row[26]) <= 7 and int(row[26]) > 0: 
+						print "RESERVED TRIPPLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 65804" % (int(row[26]), int(row[1]))
 					else:
 						self.allocatedBlocks.append( int(row[26]) )
 						
@@ -271,6 +276,8 @@ class analyzer:
 				for item in row[12:24]:
 					if item in self.reservedBlocks:
 						print "RESERVED BLOCK %d IN INODE %d AT OFFSET 0" % (int(item), int(row[1]))
+
+
 
 	def badRefCounts(self):
 		for inode in self.inodeList:
@@ -378,6 +385,17 @@ class analyzer:
 		 for item in self.inodeList:
 			print item
 
+	def CheckDots(self): 
+		for item in self.direntList: 
+			if item.name == "'.'": 
+				if item.parentInode != item.fileInode: 
+					print "DIRECTORY INODE %d NAME '.' LINK TO INODE %d SHOULD BE %d" % (item.parentInode, item.fileInode, item.parentInode)
+
+			if item.name == "'..'": 
+				finalCheck = int (self.dic[item.parentInode])
+				if  finalCheck != item.fileInode:
+					print "DIRECTORY INODE %d NAME '..' LINK TO INODE %d SHOULD BE %d" % (item.parentInode, item.fileInode, finalCheck)
+
 	def printDuplicate(self):
 			for item in self.inodeList: 
 				count = 0
@@ -401,6 +419,42 @@ class analyzer:
 				if self.allBlocks.count(nBlock) > 1:
 					print "DUPLICATE TRIPPLE INDIRECT BLOCK %d IN INODE %d AT OFFSET 65804" %  (int(nBlock), int(item.inodeNumber))
 
+			for item in self.indirectList: 
+				if self.allBlocks.count(item.blockNumber) > 1:
+					if item.indirLevel == 1:
+						print "DUPLICATE BLOCK %d IN INODE %d AT OFFSET %d" % (item.blockNumber, item.inodeNumber, item.blockOffset) 
+					if item.indirLevel == 2:
+						print "DUPLICATE INDIRECT BLOCK %d IN INODE %d AT OFFSET %d" % (item.blockNumber, item.inodeNumber, item.blockOffset)
+					if item.indirLevel == 3:
+						print "DUPLICATE DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET %d" % (item.blockNumber, item.inodeNumber, item.blockOffset)
+
+
+	def printDict(self):
+		for i in self.dic:
+			print i, self.dic[i]
+
+	def printIndirectReserved(self): 
+		for item in self.indirectList:
+			if item.blockNumber >= int(self.numBlocks) or item.blockNumber < 0:
+				if item.indirLevel == 1:
+					print "INVALID BLOCK %d IN INODE %d AT OFFSET %d" % (item.blockNumber, item.inodeNumber, item.blockOffset)
+				if item.indirLevel == 2:
+					print "INVALID INDIRECT BLOCK %d IN INODE %d AT OFFSET %d" % (item.blockNumber, item.inodeNumber, item.blockOffset)				
+				if item.indirLevel == 3:
+					print "INVALID DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET %d" % (item.blockNumber, item.inodeNumber, item.blockOffset)
+
+			elif item.blockNumber <= 7 and item.blockNumber > 0:
+				if item.indirLevel == 1:
+					print "RESERVED BLOCK %d IN INODE %d AT OFFSET %d" % (item.blockNumber, item.inodeNumber, item.blockOffset)
+				if item.indirLevel == 2:
+					print "RESERVED INDIRECT BLOCK %d IN INODE %d AT OFFSET %d" % (item.blockNumber, item.inodeNumber, item.blockOffset)				
+				if item.indirLevel == 3:
+					print "RESERVED DOUBLE INDIRECT BLOCK %d IN INODE %d AT OFFSET %d" % (item.blockNumber, item.inodeNumber, item.blockOffset)
+
+			else: 
+				self.allocatedBlocks.append(item.blockNumber)
+
+
 
 if __name__ == "__main__":
 	if len(sys.argv) != 2:
@@ -414,6 +468,7 @@ if __name__ == "__main__":
 	
 	FSA = analyzer(f)
 	FSA.initData()
+	FSA.printIndirectReserved()
 	FSA.printAllocatedBlocks()
 	FSA.printUnrefBlocks()
 	FSA.printAllocatedInodes()
@@ -422,8 +477,11 @@ if __name__ == "__main__":
 	FSA.printDuplicate()
 	FSA.badRefCounts()
 	FSA.unallocInodes()
-	FSA.verifyRootDirectories()
-	FSA.verifyDotDirectories()
+	FSA.CheckDots()
+	#FSA.printDict() 
+
+	# FSA.verifyRootDirectories()
+	# FSA.verifyDotDirectories()
 
 #	FSA.printReservedBlocks()
 #	FSA.printContents()
