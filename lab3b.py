@@ -81,7 +81,7 @@ class direntSummary:
 		self.entryLen = 0
 		self.nameLen = 0
 		self.name = ""
-		self.parentDirInode = 0
+#		self.parentDirInode = 0
 
 
 """
@@ -313,7 +313,7 @@ class analyzer:
 				print "UNREFERENCED BLOCK %s" % (i)
 
 	# attempt started here
-	def verifyHiddenDirectories(self):
+	def verifyRootDirectories(self):
 		for dirent in self.direntList:
 			if int(dirent.parentInode) == 2 and dirent.name == "'.'":
 				if int(dirent.fileInode) != int(dirent.parentInode):
@@ -322,24 +322,40 @@ class analyzer:
 				if int(dirent.fileInode) != int(dirent.parentInode):
 					print "DIRECTORY INODE %d NAME '..' LINK TO INODE %d SHOULD BE %d" % ( int(dirent.parentInode), int(dirent.fileInode), int(dirent.parentInode) )
 
-	def estDirHierarchy(self):
-		for inode in self.inodeList:
-			if inode.fileType == "d":
-				directory = directoryInode()
-				directory.inodeNumber = inode.inodeNumber
-				self.directoryList.append(directory)
+	def verifyDotDirectories(self):
+		class dirObj:
+			def __init__(self):
+				self.inodeNum = 0
+				self.parentInodeNum = 0
+				self.name = ""
 
-				hasParentDir = 0
-				for dirent in self.direntList:
-					if int(dirent.parentInode) == int(inode.inodeNumber):
-						hasParentDir = 1
-						#inode.
-
-				if (hasParent == 0):
-					directory.parentInode = row[1]
-	# and failed here		
-
+		dirObjectList = list()
 		
+		for inode in self.inodeList:
+			if inode.fileType == "d" and int(inode.inodeNumber) != 2:
+				for dirent in self.direntList:
+					if int(inode.inodeNumber) == int(dirent.parentInode):
+						dirObject = dirObj()
+						dirObject.inodeNum = inode.inodeNumber
+						dirObject.parentInodeNum = dirent.fileInode
+						dirObject.name = dirent.name
+						dirObjectList.append(dirObject)
+
+		for obj in dirObjectList:
+			# print these for explanation
+			# print "obj.inodeNum %s " % (obj.inodeNum)
+			# print "obj.parentInodeNum %s " % (obj.parentInodeNum)
+			# print "obj.name %s " % ( obj.name )
+			if obj.name == "'.'":
+				if int(obj.inodeNum) != int(obj.parentInodeNum):
+					print "DIRECTORY INODE %d NAME '.' LINK TO INODE %d SHOULD BE %d" % ( int(obj.inodeNum), int(obj.parentInodeNum), int(obj.inodeNum) )
+			# this one doesn't completely work
+			if obj.name == "'..'":
+				for dirent in self.direntList:
+					if dirent.name == "'..'" and int(obj.inodeNum) == int(dirent.parentInode):
+						if int(obj.parentInodeNum) != int(dirent.fileInode):
+							print "DIRECTORY INODE %d NAME '..' LINK TO INODE %d SHOULD BE %d" % (int(dirent.parentInode), int(dirent.fileInode), int(obj.parentInodeNum) )
+						
 
 
 	def printAllocatedInodes(self):
@@ -406,7 +422,8 @@ if __name__ == "__main__":
 	FSA.printDuplicate()
 	FSA.badRefCounts()
 	FSA.unallocInodes()
-	FSA.verifyHiddenDirectories()
+	FSA.verifyRootDirectories()
+	FSA.verifyDotDirectories()
 
 #	FSA.printReservedBlocks()
 #	FSA.printContents()
