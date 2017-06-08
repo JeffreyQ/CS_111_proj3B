@@ -76,12 +76,12 @@ class directoryInode:
 class direntSummary:
 	def __init__(self):
 		self.parentInode = 0
-		self.parentDirInode = 0
 		self.offset = 0
 		self.fileInode = 0
 		self.entryLen = 0
 		self.nameLen = 0
 		self.name = ""
+		self.parentDirInode = 0
 
 
 """
@@ -182,7 +182,7 @@ class analyzer:
 				dirent.fileInode = row[3]
 				dirent.entryLen = row[4]
 				dirent.nameLen = row[5]
-				dirent.name = row[6]
+				dirent.name = str(row[6])
 				self.direntList.append(dirent)
 			if row[0] == "INODE":
 				inode = inodeSummary()
@@ -312,13 +312,15 @@ class analyzer:
 			if i not in self.free_blocks and i not in self.allocatedBlocks and i not in self.reservedBlocks:
 				print "UNREFERENCED BLOCK %s" % (i)
 
-	# def printInvalBlocks(self):
-	#	for blockNum in self.allocatedBlocks:
-	#		if blockNum >= self
-
 	# attempt started here
-	def validateDefaultDirectory(self):					
-		for 
+	def verifyHiddenDirectories(self):
+		for dirent in self.direntList:
+			if int(dirent.parentInode) == 2 and dirent.name == "'.'":
+				if int(dirent.fileInode) != int(dirent.parentInode):
+					print "DIRECTORY INODE %d NAME '.' LINK TO INODE %d SHOULD BE %d" % (int(dirent.parentInode), int(dirent.fileInode), int(dirent.parentInode))
+			if int(dirent.parentInode) == 2 and dirent.name == "'..'":
+				if int(dirent.fileInode) != int(dirent.parentInode):
+					print "DIRECTORY INODE %d NAME '..' LINK TO INODE %d SHOULD BE %d" % ( int(dirent.parentInode), int(dirent.fileInode), int(dirent.parentInode) )
 
 	def estDirHierarchy(self):
 		for inode in self.inodeList:
@@ -404,6 +406,7 @@ if __name__ == "__main__":
 	FSA.printDuplicate()
 	FSA.badRefCounts()
 	FSA.unallocInodes()
+	FSA.verifyHiddenDirectories()
 
 #	FSA.printReservedBlocks()
 #	FSA.printContents()
