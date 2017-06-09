@@ -3,6 +3,11 @@ ID:	804808179,504646937
 EMAIL:	jeffreyyqiu@gmail.com,udasahai@gmail.com
 
 usage: python lab3b.py *.csv 
+=======
+We intend to use 5 of our slip days.
+3 from udayan, and 2 from jeffrey
+
+usage: python lab3b.py *.csv
 
 References:
 	http://effbot.org/zone/python-with-statement.htm
