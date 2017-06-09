@@ -2,7 +2,7 @@ NAME: 	Jeffrey Qiu,Udayan Sahai
 ID:	804808179,504646937
 EMAIL:	jeffreyyqiu@gmail.com,udasahai@gmail.com
 
-usage: python lab3b.py *.csv
+usage: python lab3b.py *.csv 
 
 References:
 	http://effbot.org/zone/python-with-statement.htm
